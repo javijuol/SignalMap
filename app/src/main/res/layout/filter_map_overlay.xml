@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_gravity="bottom"
+              android:weightSum="1"
+    >
+
+    <RadioGroup
+        android:id="@+id/radio_group_list_selector"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:layout_weight="0.8"
+        android:background="#80000000"
+        android:padding="4dp" >
+
+        <RadioButton
+            android:id="@+id/filter_map_2G"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/network_filter_2G"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@android:color/white" />
+
+        <View
+            android:layout_width="1dip"
+            android:layout_height="match_parent"
+            android:background="#aaa" />
+
+        <RadioButton
+            android:id="@+id/filter_map_3G"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/network_filter_3G"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@android:color/white" />
+        <View
+            android:layout_width="1dip"
+            android:layout_height="match_parent"
+            android:background="#aaa" />
+
+        <RadioButton
+            android:id="@+id/filter_map_4G"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/network_filter_4G"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@android:color/white" />
+
+        <View
+            android:layout_width="1dip"
+            android:layout_height="match_parent"
+            android:background="#aaa" />
+
+        <RadioButton
+            android:id="@+id/filter_map_all"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/network_filter_ALL"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@android:color/white" />
+    </RadioGroup>
+
+</LinearLayout>
