@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,22 @@ import java.util.ArrayList;
  * @author Javier Juan Oltra <javijuol@gmail.com>
  */
 public class NetworkSignalDAO extends BaseDAO<NetworkSignal> {
+
+    private static int MAX_STRENGTH = -50;
+    private static int MIN_STRENGTH = -120;
+    public static int[] GRADIENT_COLORS = {
+            Color.rgb(255, 0, 0),   // red
+            Color.rgb(255, 255, 0), // yellow
+            Color.rgb(0, 225, 0)    // green
+    };
+    public static float[] GRADIENT_POINTS = {
+            normalize(-105), normalize(-85), normalize(-50)
+    };
+
+    // Normalize strength value between 0 and 1
+    private static float normalize(float strength) {
+        return (strength - MIN_STRENGTH) / (MAX_STRENGTH - MIN_STRENGTH);
+    }
 
     public static int SIGNAL_TYPE_2G = 2;
     public static int SIGNAL_TYPE_3G = 3;
@@ -90,8 +107,10 @@ public class NetworkSignalDAO extends BaseDAO<NetworkSignal> {
                     cursor.getDouble(cursor.getColumnIndex(Contract.NetworkSignal.FIELD_LONGITUDE))
             );
             int strength = cursor.getInt(cursor.getColumnIndex(Contract.NetworkSignal.FIELD_STRENGTH));
-            WeightedLatLng weightedLatLng = new WeightedLatLng(latLng, strength);
-            weightedLatLngList.add(weightedLatLng);
+            if (strength >= MIN_STRENGTH && strength <= MAX_STRENGTH) {
+                WeightedLatLng weightedLatLng = new WeightedLatLng(latLng, normalize(strength));
+                weightedLatLngList.add(weightedLatLng);
+            }
         }
         return weightedLatLngList;
     }

@@ -3,7 +3,6 @@ package com.javijuol.signalmap.service;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -16,6 +15,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.WakefulBroadcastReceiver;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -46,13 +46,23 @@ public class NetworkSignalService extends Service {
      * It checks every {@link NetworkSignalService.WatchdogBroadcastReceiver#MINUTES_INTERVAL} minutes
      * if the service is still running, and start it if needed.
      */
-    public static class WatchdogBroadcastReceiver extends BroadcastReceiver {
+    public static class WatchdogBroadcastReceiver extends WakefulBroadcastReceiver {
 
         public static final int MINUTES_INTERVAL = 1;
         private static final int ALARM_ID = 0;
         private static AlarmManager alarmManager;
 
-        public static boolean scheduleNextNotification(@NonNull Context context) {
+        public static void startServiceNow(@NonNull Context context){
+            Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
+            context.sendBroadcast(intent);
+        }
+
+        public static void stopServiceNow(@NonNull Context context){
+            context.stopService(new Intent(context, NetworkSignalService.class));
+            stopNextNotification(context);
+        }
+
+        private static void scheduleNextNotification(@NonNull Context context) {
             Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_ID, intent, 0);
 
@@ -61,21 +71,17 @@ public class NetworkSignalService extends Service {
             calendar.add(Calendar.MINUTE, MINUTES_INTERVAL);
             alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             alarmManager.set(AlarmManager.ELAPSED_REALTIME, calendar.getTimeInMillis(), pendingIntent);
-
-            return true;
         }
 
-        public static void stopNextNotification(@NonNull Context context) {
-            Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
+        private static void stopNextNotification(@NonNull Context context) {Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_ID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
             alarmManager.cancel(pendingIntent);
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mServiceRunning)
-                context.startService(new Intent(context, NetworkSignalService.class));
+                startWakefulService(context, new Intent(context, NetworkSignalService.class));
             scheduleNextNotification(context);
         }
     }
@@ -94,7 +100,7 @@ public class NetworkSignalService extends Service {
         protected int mType = 0;
 
         private static final double LOCATION_ACCURACY_THRESHOLD = 500;
-        private static final double LOCATION_DISTANCE_THRESHOLD = 0; // meters
+        private static final double LOCATION_DISTANCE_THRESHOLD = 10; // meters
 
         protected OnNewDataListener mOnNewDataListener = null;
 
@@ -113,7 +119,7 @@ public class NetworkSignalService extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
-            if (location == null || (location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD) ) { //|| location.distanceTo(mLocation) < LOCATION_DISTANCE_THRESHOLD) {
+            if (location == null || (location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD) ) {
                 return;
             }
 

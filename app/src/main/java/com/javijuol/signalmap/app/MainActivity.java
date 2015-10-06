@@ -1,7 +1,6 @@
 package com.javijuol.signalmap.app;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
@@ -15,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.RadioGroup;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,10 +24,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.javijuol.signalmap.R;
+import com.javijuol.signalmap.composer.Gradient;
+import com.javijuol.signalmap.composer.WeightedHeatmapTileProvider;
 import com.javijuol.signalmap.content.dao.NetworkSignalDAO;
 import com.javijuol.signalmap.service.NetworkSignalService;
 import com.javijuol.signalmap.util.Preferences;
@@ -45,14 +47,18 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
 
     private GoogleMap mGoogleMap;
-    private HeatmapTileProvider mProvider;
+    private WeightedHeatmapTileProvider mProvider;
+    private TileOverlay mOverlay;
     private RadioGroup mFilterSignalType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.tool_bar));
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
         if(status != ConnectionResult.SUCCESS){
@@ -202,25 +208,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
         if (list != null && !list.isEmpty()) {
             if (mProvider == null) {
-                mProvider = new HeatmapTileProvider.Builder()
+                mProvider = new WeightedHeatmapTileProvider.Builder()
+                        .gradient(new Gradient(NetworkSignalDAO.GRADIENT_COLORS, NetworkSignalDAO.GRADIENT_POINTS))
                         .weightedData(list)
                         .build();
-                mGoogleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+                mOverlay = mGoogleMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
             } else {
+                mOverlay.clearTileCache();
                 mProvider.setWeightedData(list);
             }
         }
     }
 
     private void startService() {
-        Intent i = new Intent(this, NetworkSignalService.class);
-        startService(i);
-        NetworkSignalService.WatchdogBroadcastReceiver.scheduleNextNotification(this);
+        NetworkSignalService.WatchdogBroadcastReceiver.startServiceNow(this);
     }
 
     private void stopService() {
-        Intent i = new Intent(this, NetworkSignalService.class);
-        stopService(i);
-        NetworkSignalService.WatchdogBroadcastReceiver.stopNextNotification(this);
+        NetworkSignalService.WatchdogBroadcastReceiver.stopServiceNow(this);
     }
 }
