@@ -25,6 +25,7 @@ public class WeightedHeatmapTileProvider implements TileProvider {
 
     public static final int DEFAULT_RADIUS = 20;
     public static final double DEFAULT_OPACITY = 0.7D;
+    public static final double DEFAULT_DISSIPATION = 3D;
     private static final int[] DEFAULT_GRADIENT_COLORS = new int[]{Color.rgb(255, 0, 0), Color.rgb(255, 255, 0), Color.rgb(0, 255, 0)};
     private static final float[] DEFAULT_GRADIENT_START_POINTS = new float[]{1/3F, 2/3F, 1F};
     public static final Gradient DEFAULT_GRADIENT;
@@ -49,7 +50,7 @@ public class WeightedHeatmapTileProvider implements TileProvider {
         this.mRadius = builder.radius;
         this.mGradient = builder.gradient;
         this.mOpacity = builder.opacity;
-        this.mKernel = generateKernel(this.mRadius, (double)this.mRadius / 3.0D);
+        this.mKernel = generateKernel(this.mRadius, (double)this.mRadius / DEFAULT_DISSIPATION);
         this.setGradient(this.mGradient);
         this.setWeightedData(this.mData);
     }
@@ -253,17 +254,17 @@ public class WeightedHeatmapTileProvider implements TileProvider {
 
         int x;
         int y;
-        int initial;
         double val;
         for(x = 0; x < dimOld; ++x) {
             for(y = 0; y < dimOld; ++y) {
                 val = grid[x][y];
                 if(val != 0.0D) {
                     int xUpperLimit = (upperLimit < x + radius?upperLimit:x + radius) + 1;
-                    initial = lowerLimit > x - radius?lowerLimit:x - radius;
-
-                    for(int x2 = initial; x2 < xUpperLimit; ++x2) {
-                        intermediate[x2][y] += val * kernel[x2 - (x - radius)];
+                    int xLowerLimit = lowerLimit > x - radius?lowerLimit:x - radius;
+                    for(int x2 = xLowerLimit; x2 < xUpperLimit; ++x2) {
+                        if (val * kernel[x2 - (x - radius)] > intermediate[x2][y]) {
+                            intermediate[x2][y] = val * kernel[x2 - (x - radius)];
+                        }
                     }
                 }
             }
@@ -276,10 +277,11 @@ public class WeightedHeatmapTileProvider implements TileProvider {
                 val = intermediate[x][y];
                 if(val != 0.0D) {
                     int yUpperLimit = (upperLimit < y + radius?upperLimit:y + radius) + 1;
-                    initial = lowerLimit > y - radius?lowerLimit:y - radius;
-
-                    for(int y2 = initial; y2 < yUpperLimit; ++y2) {
-                        outputGrid[x - radius][y2 - radius] += val * kernel[y2 - (y - radius)];
+                    int yLowerLimit = lowerLimit > y - radius?lowerLimit:y - radius;
+                    for(int y2 = yLowerLimit; y2 < yUpperLimit; ++y2) {
+                        if (val * kernel[y2 - (y - radius)] > outputGrid[x - radius][y2 - radius]) {
+                            outputGrid[x - radius][y2 - radius] = val * kernel[y2 - (y - radius)];
+                        }
                     }
                 }
             }
