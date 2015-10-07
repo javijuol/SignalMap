@@ -10,6 +10,20 @@ The data is displayed on a heat map, and the user is able to filter it by networ
 
 The app uses Google Maps Android API v2, so the device needs to run Google Play Services.
 
+## Map's leyend
+
++ From -50dBm to -85dBm   => green 
++ From -85dBm to -105dBm  => yellow
++ From -105dBm to -120dBm => red
+
+## Limitations
+
+Some Android frameworks may suppress signal strength notification when the screen is off to conserve power.
+The app screen remains on as long as it stacks in the foreground. Notice that it still works on background 
+when the app is still on.
+This limitation depends on how the [RIL](https://en.wikipedia.org/wiki/Radio_Interface_Layer) driver
+was implemented, usually by the manufacturer.
+
 ## Configuration
 
 Change **GOOGLE_API_KEY** in the *AndroidManifest.xml*
