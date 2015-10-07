@@ -2,8 +2,11 @@
     <string name="app_name">SignalMap</string>
     <string name="menu_enable_service">Enable service</string>
     <string name="menu_disable_service">Disable service</string>
+    <string name="toast_enable_service">Service enabled</string>
+    <string name="toast_disable_service">Service disabled</string>
     <string name="network_filter_2G">2G</string>
     <string name="network_filter_3G">3G</string>
     <string name="network_filter_4G">4G</string>
     <string name="network_filter_ALL">All</string>
+    <string name="location_permission_required">You did not allow to access your current location</string>
 </resources>

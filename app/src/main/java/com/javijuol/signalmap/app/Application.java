@@ -15,7 +15,7 @@ public class Application extends android.app.Application {
 
     public static final String DEBUG_TAG = "debug.signalmap";
     public static final boolean DEVELOPER_MODE = BuildConfig.DEBUG;
-    public static boolean FIRST_TIME = false;
+    public static boolean FIRST_TIME = true;
 
     @Override
     public void onCreate() {
@@ -45,9 +45,10 @@ public class Application extends android.app.Application {
     }
 
     private void onFirstTime() {
+        FIRST_TIME = false;
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true);
-        editor.putInt(Preferences.PREFERENCE_COLLECTING_DATA, Preferences.FilterDataType.FILTER_DATA_ALL.getCode());
+        editor.putInt(Preferences.PREFERENCE_FILTER_DATA, Preferences.FilterDataType.FILTER_DATA_ALL.getCode());
         editor.apply();
     }
 

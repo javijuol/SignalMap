@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.tool_bar));
+        setSupportActionBar((Toolbar) findViewById(R.id.appbar));
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         MenuItem toggle_service = menu.findItem(R.id.menu_toggle_service);
 
-        boolean collectingData = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true);
+        boolean collectingData = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true);
         toggle_service.setTitle(collectingData ? R.string.menu_disable_service : R.string.menu_enable_service);
 
         return true;
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_toggle_service:
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                 boolean collectingData = sharedPreferences.getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true);
                 if(collectingData)
                     stopService();
@@ -221,10 +222,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     private void startService() {
+        Toast.makeText(this, R.string.toast_enable_service, Toast.LENGTH_LONG).show();
         NetworkSignalService.WatchdogBroadcastReceiver.startServiceNow(this);
     }
 
     private void stopService() {
+        Toast.makeText(this, R.string.toast_disable_service, Toast.LENGTH_LONG).show();
         NetworkSignalService.WatchdogBroadcastReceiver.stopServiceNow(this);
     }
 }
