@@ -6,15 +6,15 @@ This application obtains the signal strength and current location reported by OS
 It has a service running always in background collecting data and saving it in a persistent data storage.
 The data is displayed on a heat map, and the user is able to filter it by network technology (2G, 3G, 4G).
 
-![alt tag](./captures/screenshot01.png)
+![screenshot](./captures/screenshot01.png)
 
 The app uses Google Maps Android API v2, so the device needs to run Google Play Services.
 
 ## Map's leyend
 
-+ From -50dBm to -85dBm: ![alt tag](./captures/green.png) green 
-+ From -85dBm to -105dBm: ![alt tag](./captures/yellow.png) yellow
-+ From -105dBm to -120dBm: ![alt tag](./captures/red.png) red
++ From -50dBm to -85dBm: ![green color](./captures/green.png) green 
++ From -85dBm to -105dBm: ![yellow color](./captures/yellow.png) yellow
++ From -105dBm to -120dBm: ![red color](./captures/red.png) red
 
 ## Limitations
 
