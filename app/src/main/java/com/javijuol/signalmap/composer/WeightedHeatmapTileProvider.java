@@ -24,7 +24,7 @@ import java.util.Iterator;
 public class WeightedHeatmapTileProvider implements TileProvider {
 
     public static final int DEFAULT_RADIUS = 20;
-    public static final double DEFAULT_OPACITY = 0.7D;
+    public static final double DEFAULT_OPACITY = 0.5D;
     public static final double DEFAULT_DISSIPATION = 3D;
     private static final int[] DEFAULT_GRADIENT_COLORS = new int[]{Color.rgb(255, 0, 0), Color.rgb(255, 255, 0), Color.rgb(0, 255, 0)};
     private static final float[] DEFAULT_GRADIENT_START_POINTS = new float[]{1/3F, 2/3F, 1F};
@@ -262,8 +262,11 @@ public class WeightedHeatmapTileProvider implements TileProvider {
                     int xUpperLimit = (upperLimit < x + radius?upperLimit:x + radius) + 1;
                     int xLowerLimit = lowerLimit > x - radius?lowerLimit:x - radius;
                     for(int x2 = xLowerLimit; x2 < xUpperLimit; ++x2) {
-                        if (val * kernel[x2 - (x - radius)] > intermediate[x2][y]) {
-                            intermediate[x2][y] = val * kernel[x2 - (x - radius)];
+                        if (intermediate[x2][y] > 0) {
+                            intermediate[x2][y] += val;
+                            intermediate[x2][y] /= 2;
+                        } else {
+                            intermediate[x2][y] += val;
                         }
                     }
                 }
@@ -279,8 +282,11 @@ public class WeightedHeatmapTileProvider implements TileProvider {
                     int yUpperLimit = (upperLimit < y + radius?upperLimit:y + radius) + 1;
                     int yLowerLimit = lowerLimit > y - radius?lowerLimit:y - radius;
                     for(int y2 = yLowerLimit; y2 < yUpperLimit; ++y2) {
-                        if (val * kernel[y2 - (y - radius)] > outputGrid[x - radius][y2 - radius]) {
-                            outputGrid[x - radius][y2 - radius] = val * kernel[y2 - (y - radius)];
+                        if (outputGrid[x - radius][y2 - radius] > 0) {
+                            outputGrid[x - radius][y2 - radius] += val;
+                            outputGrid[x - radius][y2 - radius] /= 2;
+                        } else {
+                            outputGrid[x - radius][y2 - radius] += val;
                         }
                     }
                 }
