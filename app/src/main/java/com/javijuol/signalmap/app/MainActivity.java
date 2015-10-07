@@ -76,6 +76,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        refreshData();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -195,7 +202,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void refreshData() {
         mProvider = null;
-        mGoogleMap.clear();
+        if (mGoogleMap != null)
+            mGoogleMap.clear();
         getSupportLoaderManager().restartLoader(0, null, this);
     }
 

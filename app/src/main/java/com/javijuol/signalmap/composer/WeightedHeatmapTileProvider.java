@@ -259,15 +259,12 @@ public class WeightedHeatmapTileProvider implements TileProvider {
             for(y = 0; y < dimOld; ++y) {
                 val = grid[x][y];
                 if(val != 0.0D) {
-                    int xUpperLimit = (upperLimit < x + radius?upperLimit:x + radius) + 1;
                     int xLowerLimit = lowerLimit > x - radius?lowerLimit:x - radius;
+                    int xUpperLimit = (upperLimit < x + radius?upperLimit:x + radius) + 1;
                     for(int x2 = xLowerLimit; x2 < xUpperLimit; ++x2) {
-                        if (intermediate[x2][y] > 0) {
-                            intermediate[x2][y] += val;
-                            intermediate[x2][y] /= 2;
-                        } else {
-                            intermediate[x2][y] += val;
-                        }
+                        int average = intermediate[x2][y] == 0 ? 1 : 2;
+                        intermediate[x2][y] += val;
+                        intermediate[x2][y] /= average;
                     }
                 }
             }
@@ -279,15 +276,12 @@ public class WeightedHeatmapTileProvider implements TileProvider {
             for(y = 0; y < dimOld; ++y) {
                 val = intermediate[x][y];
                 if(val != 0.0D) {
-                    int yUpperLimit = (upperLimit < y + radius?upperLimit:y + radius) + 1;
                     int yLowerLimit = lowerLimit > y - radius?lowerLimit:y - radius;
+                    int yUpperLimit = (upperLimit < y + radius?upperLimit:y + radius) + 1;
                     for(int y2 = yLowerLimit; y2 < yUpperLimit; ++y2) {
-                        if (outputGrid[x - radius][y2 - radius] > 0) {
-                            outputGrid[x - radius][y2 - radius] += val;
-                            outputGrid[x - radius][y2 - radius] /= 2;
-                        } else {
-                            outputGrid[x - radius][y2 - radius] += val;
-                        }
+                        int average = outputGrid[x - radius][y2 - radius] == 0 ? 1 : 2;
+                        outputGrid[x - radius][y2 - radius] += val;
+                        outputGrid[x - radius][y2 - radius] /= average;
                     }
                 }
             }
