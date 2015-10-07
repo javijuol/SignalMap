@@ -12,9 +12,9 @@ The app uses Google Maps Android API v2, so the device needs to run Google Play 
 
 ## Map's leyend
 
-+ From -50dBm to -85dBm: ![green color](./captures/green.png) green 
-+ From -85dBm to -105dBm: ![yellow color](./captures/yellow.png) yellow
-+ From -105dBm to -120dBm: ![red color](./captures/red.png) red
++ From -50dBm to -85dBm: ![green color](./captures/green.png) 
++ From -85dBm to -105dBm: ![yellow color](./captures/yellow.png)
++ From -105dBm to -120dBm: ![red color](./captures/red.png)
 
 ## Limitations
 
