@@ -192,18 +192,19 @@ public class NetworkSignalService extends Service {
     @Override
     public void onCreate() {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        mNetworkListener = new NetworkListener(getBaseContext(), new NetworkListener.OnNewDataListener() {
-            @Override
-            public void onNewData(Location location, int strength, int type) {
-                saveData(location, strength, type);
-            }
-        });
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mServiceRunning = true;
+
+        mNetworkListener = new NetworkListener(getBaseContext(), new NetworkListener.OnNewDataListener() {
+            @Override
+            public void onNewData(Location location, int strength, int type) {
+                saveData(location, strength, type);
+            }
+        });
 
         Criteria criteria = new Criteria();
         criteria.setAltitudeRequired(false);
