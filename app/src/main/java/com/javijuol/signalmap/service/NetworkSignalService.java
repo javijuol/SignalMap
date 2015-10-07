@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.WakefulBroadcastReceiver;
@@ -28,6 +29,7 @@ import com.javijuol.signalmap.R;
 import com.javijuol.signalmap.app.Application;
 import com.javijuol.signalmap.content.bean.NetworkSignal;
 import com.javijuol.signalmap.content.dao.NetworkSignalDAO;
+import com.javijuol.signalmap.util.Preferences;
 
 import java.util.Calendar;
 import java.util.Random;
@@ -85,9 +87,11 @@ public class NetworkSignalService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!mServiceRunning)
-                startWakefulService(context, new Intent(context, NetworkSignalService.class));
-            scheduleNextNotification(context);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true)) {
+                if (!mServiceRunning)
+                    startWakefulService(context, new Intent(context, NetworkSignalService.class));
+                scheduleNextNotification(context);
+            }
         }
     }
 

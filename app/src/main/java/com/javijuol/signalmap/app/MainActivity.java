@@ -70,7 +70,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             mFilterSignalType = (RadioGroup) findViewById(R.id.radio_group_list_selector);
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
-            startService();
+            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true))
+                startService();
         }
     }
 
@@ -83,12 +84,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-
         MenuItem toggle_service = menu.findItem(R.id.menu_toggle_service);
-
-        boolean collectingData = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true);
-        toggle_service.setTitle(collectingData ? R.string.menu_disable_service : R.string.menu_enable_service);
-
+        toggle_service.setTitle(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Preferences.PREFERENCE_COLLECTING_DATA, true) ? R.string.menu_disable_service : R.string.menu_enable_service);
         return true;
     }
 
@@ -185,13 +182,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
 
         int filter_type = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getInt(Preferences.PREFERENCE_FILTER_DATA, Preferences.FilterDataType.FILTER_DATA_ALL.getCode());
-        int filter_option_selected = R.id.filter_map_all;
+        int filter_option_selected;
         if (filter_type == Preferences.FilterDataType.FILTER_DATA_2G.getCode())
             filter_option_selected = R.id.filter_map_2G;
-        if (filter_type == Preferences.FilterDataType.FILTER_DATA_3G.getCode())
+        else if (filter_type == Preferences.FilterDataType.FILTER_DATA_3G.getCode())
             filter_option_selected = R.id.filter_map_3G;
-        if (filter_type == Preferences.FilterDataType.FILTER_DATA_4G.getCode())
+        else if (filter_type == Preferences.FilterDataType.FILTER_DATA_4G.getCode())
             filter_option_selected = R.id.filter_map_4G;
+        else filter_option_selected = R.id.filter_map_all;
         mFilterSignalType.check(filter_option_selected);
     }
 
