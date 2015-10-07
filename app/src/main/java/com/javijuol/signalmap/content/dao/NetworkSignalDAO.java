@@ -21,8 +21,8 @@ import java.util.ArrayList;
  */
 public class NetworkSignalDAO extends BaseDAO<NetworkSignal> {
 
-    private static int MAX_STRENGTH = -50;
-    private static int MIN_STRENGTH = -120;
+    public static int MAX_STRENGTH = -50;
+    public static int MIN_STRENGTH = -120;
     public static int[] GRADIENT_COLORS = {
             Color.rgb(255, 0, 0),   // red
             Color.rgb(255, 255, 0), // yellow

@@ -1,10 +1,12 @@
 package com.javijuol.signalmap.service;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -20,7 +22,9 @@ import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.javijuol.signalmap.R;
 import com.javijuol.signalmap.app.Application;
 import com.javijuol.signalmap.content.bean.NetworkSignal;
 import com.javijuol.signalmap.content.dao.NetworkSignalDAO;
@@ -52,12 +56,12 @@ public class NetworkSignalService extends Service {
         private static final int ALARM_ID = 0;
         private static AlarmManager alarmManager;
 
-        public static void startServiceNow(@NonNull Context context){
+        public static void startServiceNow(@NonNull Context context) {
             Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
             context.sendBroadcast(intent);
         }
 
-        public static void stopServiceNow(@NonNull Context context){
+        public static void stopServiceNow(@NonNull Context context) {
             context.stopService(new Intent(context, NetworkSignalService.class));
             stopNextNotification(context);
         }
@@ -73,7 +77,8 @@ public class NetworkSignalService extends Service {
             alarmManager.set(AlarmManager.ELAPSED_REALTIME, calendar.getTimeInMillis(), pendingIntent);
         }
 
-        private static void stopNextNotification(@NonNull Context context) {Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
+        private static void stopNextNotification(@NonNull Context context) {
+            Intent intent = new Intent(context, NetworkSignalService.WatchdogBroadcastReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_ID, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             alarmManager.cancel(pendingIntent);
         }
@@ -119,7 +124,7 @@ public class NetworkSignalService extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
-            if (location == null || (location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD) ) {
+            if (location == null || (location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD)) {
                 return;
             }
 
@@ -148,7 +153,7 @@ public class NetworkSignalService extends Service {
             // This is only for emulator, so it can simulate different values for the signal strength
             if (Build.FINGERPRINT.contains("generic")) {
                 Random r = new Random();
-                mStrength = (r.nextInt(120 - 50) + 50) * -1;
+                mStrength = r.nextInt(NetworkSignalDAO.MAX_STRENGTH - NetworkSignalDAO.MIN_STRENGTH) + NetworkSignalDAO.MIN_STRENGTH;
             }
 
             TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
@@ -207,9 +212,16 @@ public class NetworkSignalService extends Service {
             String providerFine = mLocationManager.getBestProvider(criteria, true);
             //  requestLocationUpdates(provider , minTime, minDistance, listener);
             if (providerFine != null) {
-                mLocationManager.requestLocationUpdates(providerFine, 2000, (float) NetworkListener.LOCATION_DISTANCE_THRESHOLD, mNetworkListener);
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        mLocationManager.requestLocationUpdates(providerFine, 2000, (float) NetworkListener.LOCATION_DISTANCE_THRESHOLD, mNetworkListener);
+                    } else {
+                        Toast.makeText(this, R.string.location_permission_required, Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    mLocationManager.requestLocationUpdates(providerFine, 2000, (float) NetworkListener.LOCATION_DISTANCE_THRESHOLD, mNetworkListener);
+                }
             }
-
             try {
                 mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                 mTelephonyManager.listen(mNetworkListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
@@ -224,7 +236,13 @@ public class NetworkSignalService extends Service {
     @Override
     public void onDestroy() {
         mServiceRunning = false;
-        mLocationManager.removeUpdates(mNetworkListener);
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                mLocationManager.removeUpdates(mNetworkListener);
+            }
+        } else {
+            mLocationManager.removeUpdates(mNetworkListener);
+        }
         mTelephonyManager.listen(mNetworkListener, PhoneStateListener.LISTEN_NONE);
 
         super.onDestroy();
