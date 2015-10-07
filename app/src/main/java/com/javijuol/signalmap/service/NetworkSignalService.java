@@ -205,33 +205,31 @@ public class NetworkSignalService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         mServiceRunning = true;
 
-        if (intent != null) {
-            Criteria criteria = new Criteria();
-            criteria.setAltitudeRequired(false);
-            criteria.setBearingRequired(false);
-            criteria.setCostAllowed(false);
-            criteria.setSpeedRequired(false);
-            criteria.setPowerRequirement(Criteria.POWER_HIGH);
-            criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            String providerFine = mLocationManager.getBestProvider(criteria, true);
-            //  requestLocationUpdates(provider , minTime, minDistance, listener);
-            if (providerFine != null) {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        mLocationManager.requestLocationUpdates(providerFine, 2000, (float) NetworkListener.LOCATION_DISTANCE_THRESHOLD, mNetworkListener);
-                    } else {
-                        Toast.makeText(this, R.string.location_permission_required, Toast.LENGTH_LONG).show();
-                    }
-                } else {
+        Criteria criteria = new Criteria();
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setCostAllowed(false);
+        criteria.setSpeedRequired(false);
+        criteria.setPowerRequirement(Criteria.POWER_HIGH);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        String providerFine = mLocationManager.getBestProvider(criteria, true);
+        //  requestLocationUpdates(provider , minTime, minDistance, listener);
+        if (providerFine != null) {
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     mLocationManager.requestLocationUpdates(providerFine, 2000, (float) NetworkListener.LOCATION_DISTANCE_THRESHOLD, mNetworkListener);
+                } else {
+                    Toast.makeText(this, R.string.location_permission_required, Toast.LENGTH_LONG).show();
                 }
+            } else {
+                mLocationManager.requestLocationUpdates(providerFine, 2000, (float) NetworkListener.LOCATION_DISTANCE_THRESHOLD, mNetworkListener);
             }
-            try {
-                mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                mTelephonyManager.listen(mNetworkListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        }
+        try {
+            mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            mTelephonyManager.listen(mNetworkListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         return START_STICKY;
